@@ -1,0 +1,48 @@
+service: podcast-backend
+frameworkVersion: '2'
+
+plugins:
+  - serverless-iam-roles-per-function
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  region: eu-west-1
+
+package:
+  exclude:
+    - yarn.json
+    - package.json
+
+custom:
+  region: ${opt:region, self:provider.region}
+  stage: ${opt:stage, self:provider.stage}
+
+functions:
+  parseCsv:
+    handler: functions/parse-csv.handler
+    environment:
+      PODCASTS_TABLE: !Ref PodacastsTable
+    iamRoleStatements:
+      - Effect: Allow
+        Action: dynamodb:PutItem
+        Resource: !GetAtt PodacastsTable.Arn
+
+resources:
+  Resources:
+    PodacastsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: Podcast_${self:custom.stage}
+        BillingMode: PAY_PER_REQUEST
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        Tags:
+          - Key: Environment
+            Value: ${self:custom.stage}
+          - Key: Name
+            Value: podcasts-table

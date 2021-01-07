@@ -1,0 +1,23 @@
+{
+  "name": "podcast-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "handler.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "aws-sdk": "^2.807.0",
+    "serverless": "2.4.0",
+    "serverless-appsync-plugin": "^1.4.0",
+    "serverless-iam-roles-per-function": "^3.0.1"
+  },
+  "dependencies": {
+    "chance": "^1.1.7",
+    "ulid": "^2.3.0",
+    "axios": "^0.21.0"
+  }
+}
