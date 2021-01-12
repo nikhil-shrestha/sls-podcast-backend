@@ -12,7 +12,8 @@ module.exports.handler = async (event) => {
     ExpressionAttributeValues: {
       ':itunesID': id
     },
-    Limit: 25
+    Limit: 25,
+    ScanIndexForward: false //DESC ORDER, Set 'true' if u want asc order
   };
 
   let response;
