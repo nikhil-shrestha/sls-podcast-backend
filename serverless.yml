@@ -7,7 +7,13 @@ plugins:
 provider:
   name: aws
   runtime: nodejs12.x
-  region: eu-west-1
+  stage: ${opt:stage, "dev"}
+  region: ${opt:region, "us-east-1"}
+  versionFunctions: false # optional, default is true
+
+  environment:
+    PODCAST_INDEX_API_KEY: JCB8PKWPNRFNG5TWMFZN
+    PODCAST_INDEX_SECRET_KEY: UkstyfaAhBftkvG4FUq8AJMQxKLSVjp^mcUf^8M#
 
 package:
   exclude:
@@ -22,18 +28,104 @@ functions:
   parseCsv:
     handler: functions/parse-csv.handler
     environment:
+      TABLE_NAME: !Ref ScrapeTable
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:BatchWriteItem
+        Resource: !GetAtt ScrapeTable.Arn
+    events:
+      - http:
+          method: GET
+          path: /podcast/scrape/parse
+          cors: true
+
+  savePodcast:
+    handler: functions/save-podcast.handler
+    timeout: 30 # optional, in seconds, default is 6
+    environment:
+      TABLE_NAME: !Ref ScrapeTable
+      PODCASTS_TABLE: !Ref PodacastsTable
+      FEEDS_TABLE: !Ref FeedsTable
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Scan
+        Resource: !GetAtt ScrapeTable.Arn
+      - Effect: Allow
+        Action:
+          - dynamodb:PutItem
+          - dynamodb:BatchWriteItem
+        Resource: !GetAtt PodacastsTable.Arn
+      - Effect: Allow
+        Action:
+          - dynamodb:BatchWriteItem
+        Resource: !GetAtt FeedsTable.Arn
+    events:
+      - http:
+          method: GET
+          path: /podcast/scrape/save
+          cors: true
+
+  listPodcast:
+    handler: functions/list-podcast.handler
+    timeout: 30 # optional, in seconds, default is 6
+    environment:
       PODCASTS_TABLE: !Ref PodacastsTable
     iamRoleStatements:
       - Effect: Allow
-        Action: dynamodb:PutItem
+        Action:
+          - dynamodb:Scan
         Resource: !GetAtt PodacastsTable.Arn
+    events:
+      - http:
+          method: GET
+          path: /podcast/list
+          cors: true
+
+  listPodcastEpisode:
+    handler: functions/list-podcast-episode.handler
+    timeout: 30 # optional, in seconds, default is 6
+    environment:
+      FEEDS_TABLE: !Ref FeedsTable
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+        Resource:
+          - !GetAtt FeedsTable.Arn
+          - !Sub
+            - '${TableArn}/*'
+            - { TableArn: !GetAtt 'FeedsTable.Arn' }
+    events:
+      - http:
+          method: GET
+          path: /podcast/episode/{id}
+          cors: true
 
 resources:
   Resources:
+    ScrapeTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: Scrape_${self:custom.stage}
+        BillingMode: PAY_PER_REQUEST
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        Tags:
+          - Key: Environment
+            Value: ${self:custom.stage}
+          - Key: Name
+            Value: scrape-table
+
     PodacastsTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: Podcast_${self:custom.stage}
+        TableName: Podcasts_${self:custom.stage}
         BillingMode: PAY_PER_REQUEST
         KeySchema:
           - AttributeName: id
@@ -46,3 +138,33 @@ resources:
             Value: ${self:custom.stage}
           - Key: Name
             Value: podcasts-table
+
+    FeedsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: Feeds_${self:custom.stage}
+        BillingMode: PAY_PER_REQUEST
+        KeySchema:
+          - AttributeName: guid
+            KeyType: HASH
+        AttributeDefinitions:
+          - AttributeName: guid
+            AttributeType: S
+          - AttributeName: itunes_id
+            AttributeType: S
+          - AttributeName: datePublished
+            AttributeType: N
+        GlobalSecondaryIndexes:
+          - IndexName: byItunesId
+            KeySchema:
+              - AttributeName: itunes_id
+                KeyType: HASH
+              - AttributeName: datePublished
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+        Tags:
+          - Key: Environment
+            Value: ${self:custom.stage}
+          - Key: Name
+            Value: feeds-table

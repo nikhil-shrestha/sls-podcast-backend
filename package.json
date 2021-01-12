@@ -4,20 +4,26 @@
   "description": "",
   "main": "handler.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest --verbose ./__tests__/test_cases/unit"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "aws-sdk": "^2.807.0",
+    "jest": "^26.6.3",
     "serverless": "2.4.0",
-    "serverless-appsync-plugin": "^1.4.0",
     "serverless-iam-roles-per-function": "^3.0.1"
   },
   "dependencies": {
+    "axios": "^0.21.0",
     "chance": "^1.1.7",
-    "ulid": "^2.3.0",
-    "axios": "^0.21.0"
+    "csv-parser": "^3.0.0",
+    "lodash": "^4.17.20",
+    "podcast-index-api": "^1.1.7",
+    "request": "^2.88.2",
+    "request-promise": "^4.2.6",
+    "rss-parser": "^3.10.0",
+    "ulid": "^2.3.0"
   }
 }
