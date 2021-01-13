@@ -13,10 +13,9 @@ module.exports.handler = async () => {
 
   try {
     const result = await dynamoDb.scan(params);
-    const podcasts = result.Items;
     response = {
       statusCode: 200,
-      body: JSON.stringify(podcasts)
+      body: JSON.stringify(result)
     };
   } catch (error) {
     console.log(error);
