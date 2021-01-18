@@ -27,6 +27,7 @@ custom:
 functions:
   parseCsv:
     handler: functions/parse-csv.handler
+    timeout: 30 # optional, in seconds, default is 6
     environment:
       TABLE_NAME: !Ref ScrapeTable
     iamRoleStatements:
@@ -69,7 +70,6 @@ functions:
 
   listPodcast:
     handler: functions/list-podcast.handler
-    timeout: 30 # optional, in seconds, default is 6
     environment:
       PODCASTS_TABLE: !Ref PodacastsTable
     iamRoleStatements:
@@ -85,7 +85,6 @@ functions:
 
   listPodcastEpisode:
     handler: functions/list-podcast-episode.handler
-    timeout: 30 # optional, in seconds, default is 6
     environment:
       FEEDS_TABLE: !Ref FeedsTable
     iamRoleStatements:
@@ -101,6 +100,36 @@ functions:
       - http:
           method: GET
           path: /podcast/episode/{id}
+          cors: true
+
+  searchName:
+    handler: functions/search-name.handler
+    environment:
+      PODCASTS_TABLE: !Ref PodacastsTable
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Scan
+        Resource: !GetAtt PodacastsTable.Arn
+    events:
+      - http:
+          method: POST
+          path: /podcast/search
+          cors: true
+
+  filterGenre:
+    handler: functions/filter-genres.handler
+    environment:
+      PODCASTS_TABLE: !Ref PodacastsTable
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Scan
+        Resource: !GetAtt PodacastsTable.Arn
+    events:
+      - http:
+          method: GET
+          path: /podcast/genre/{genre}
           cors: true
 
 resources:

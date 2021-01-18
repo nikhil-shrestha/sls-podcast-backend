@@ -16,6 +16,12 @@
     "serverless-iam-roles-per-function": "^3.0.1"
   },
   "dependencies": {
+    "@middy/core": "^1.5.2",
+    "@middy/http-cors": "^1.5.2",
+    "@middy/http-error-handler": "^1.5.2",
+    "@middy/http-event-normalizer": "^1.5.2",
+    "@middy/http-json-body-parser": "^1.5.2",
+    "@middy/validator": "^1.5.2",
     "axios": "^0.21.0",
     "chance": "^1.1.7",
     "csv-parser": "^3.0.0",
