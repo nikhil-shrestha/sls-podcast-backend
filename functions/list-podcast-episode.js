@@ -1,8 +1,9 @@
 const dynamoDb = require('./libs/dynamodb-lib');
+const commonMiddleware = require('./libs/middleware');
 
 const { FEEDS_TABLE } = process.env;
 
-module.exports.handler = async (event) => {
+const main = async (event) => {
   const { id } = event.pathParameters;
 
   const params = {
@@ -37,3 +38,5 @@ module.exports.handler = async (event) => {
 
   return response;
 };
+
+module.exports.handler = commonMiddleware(main);

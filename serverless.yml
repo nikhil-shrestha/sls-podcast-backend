@@ -43,7 +43,7 @@ functions:
 
   savePodcast:
     handler: functions/save-podcast.handler
-    timeout: 30 # optional, in seconds, default is 6
+    timeout: 180 # optional, in seconds, default is 6
     environment:
       TABLE_NAME: !Ref ScrapeTable
       PODCASTS_TABLE: !Ref PodacastsTable

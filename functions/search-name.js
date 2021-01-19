@@ -1,5 +1,4 @@
 const dynamoDb = require('./libs/dynamodb-lib');
-
 const commonMiddleware = require('./libs/middleware');
 
 const { PODCASTS_TABLE } = process.env;
@@ -11,7 +10,7 @@ const main = async (event) => {
     TableName: PODCASTS_TABLE,
     FilterExpression: 'contains(#name, :query)',
     ExpressionAttributeNames: {
-      '#name': 'collectionCensoredName'
+      '#name': 'collectionName'
     },
     ExpressionAttributeValues: {
       ':query': query

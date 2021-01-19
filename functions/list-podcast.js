@@ -1,8 +1,9 @@
 const dynamoDb = require('./libs/dynamodb-lib');
+const commonMiddleware = require('./libs/middleware');
 
 const { PODCASTS_TABLE } = process.env;
 
-module.exports.handler = async () => {
+const main = async () => {
   let params;
   params = {
     TableName: PODCASTS_TABLE,
@@ -29,3 +30,5 @@ module.exports.handler = async () => {
 
   return response;
 };
+
+module.exports.handler = commonMiddleware(main);
